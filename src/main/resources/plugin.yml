@@ -1,0 +1,4 @@
+name: Tyrlon
+main: me.riking.tyrlon.Tyrlon
+version: ${project.version}
+
