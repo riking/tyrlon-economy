@@ -1,4 +1,4 @@
-package me.riking.tyrlon.db;
+package me.riking.tyrlon.db.sql;
 
 import java.io.IOException;
 import java.sql.Connection;

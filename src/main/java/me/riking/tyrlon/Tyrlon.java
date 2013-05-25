@@ -1,6 +1,6 @@
 package me.riking.tyrlon;
 
-import me.riking.tyrlon.db.MysqlDatabase;
+import me.riking.tyrlon.db.sql.MysqlDatabase;
 import me.riking.tyrlon.db.yaml.YamlDatabase;
 
 import org.apache.commons.lang.Validate;
