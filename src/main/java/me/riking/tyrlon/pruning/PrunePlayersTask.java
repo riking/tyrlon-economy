@@ -25,6 +25,8 @@ public class PrunePlayersTask extends BukkitRunnable {
 
     @Override
     public void run() {
+        System.out.println("Running prune task");
+
         Set<String> initPlayerSet = plugin.getAccountStorage().playerAccounts.keySet();
         HashSet<String> resultSet = new HashSet<String>();
         int batchSize = Math.min(plugin.pruneBatchSize, initPlayerSet.size());

@@ -42,7 +42,9 @@ public class Tyrlon extends JavaPlugin {
         try {
             loadDatabaseConfig();
         } catch (Exception e) {
-            getLogger().severe("Failed to load Tyrlon: " + e.getMessage());
+            e.printStackTrace();
+            getServer().getPluginManager().disablePlugin(this);
+            return;
         }
         dbase.loadBlocking(accounts);
         getServer().getScheduler().runTaskTimerAsynchronously(this, new PrunePlayersTask(this), 50, prunePeriod);
@@ -57,6 +59,15 @@ public class Tyrlon extends JavaPlugin {
     @Override
     public void onDisable() {
         saveConfig();
+        try {
+            dbase.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+        dbase = null;
+        instance = null;
     }
 
     private void loadConfig() {
@@ -65,6 +76,11 @@ public class Tyrlon extends JavaPlugin {
         pruneBatchSize = config.getInt("Prune.MaxBatchSize", 400); // players to check each tick
         prunePeriod = config.getLong("Prune.PeriodTicks", 360000); // milliseconds in a month
         flushEachTransaction = config.getBoolean("FlushEachChange", false);
+        if (!config.contains("database")) {
+            config.createSection("database");
+            config.createSection("database.yaml");
+            config.createSection("database.mysql");
+        }
     }
 
     private void loadDatabaseConfig() throws RuntimeException {
@@ -74,10 +90,17 @@ public class Tyrlon extends JavaPlugin {
             config.set("DatabaseType", "external");
         } else {
             String type = config.getString("DatabaseType", "yaml");
+            ConfigurationSection section = config.getConfigurationSection("database."+type);
             if (type.equalsIgnoreCase("yaml")) {
-                dbase = new YamlDatabase(this, config.getConfigurationSection("database.yaml"));
+                if (section == null) {
+                    section = config.createSection("database.yaml");
+                }
+                dbase = new YamlDatabase(this, section);
             } else if (type.equalsIgnoreCase("mysql")) {
-                dbase = new MysqlDatabase(this, config.getConfigurationSection("database.mysql"));
+                if (section == null) {
+                    section = config.createSection("database.mysql");
+                }
+                dbase = new MysqlDatabase(this, section);
             } else {
                 // Failure!
                 if (type.equalsIgnoreCase("external")) {
