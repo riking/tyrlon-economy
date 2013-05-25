@@ -1,7 +1,7 @@
 package me.riking.tyrlon;
 
 import me.riking.tyrlon.db.MysqlDatabase;
-import me.riking.tyrlon.db.YamlDatabase;
+import me.riking.tyrlon.db.yaml.YamlDatabase;
 
 import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.ConfigurationSection;
@@ -15,14 +15,15 @@ public class Tyrlon extends JavaPlugin {
         return instance;
     }
 
-    public static AccountStorage getAccountStorage() {
-        return instance.accounts;
+    public AccountStorage getAccountStorage() {
+        return accounts;
     }
 
     private Database dbase;
 
-    public long staleAge;
     public boolean flushEachTransaction;
+    public int pruneBatchSize;
+    public long pruneMaxAge;
 
     public void onLoad() {
         instance = this;
@@ -39,13 +40,24 @@ public class Tyrlon extends JavaPlugin {
         } catch (Exception e) {
             getLogger().severe("Failed to load Tyrlon: " + e.getMessage());
         }
-        dbase.loadAllBanks(accounts);
-        dbase.loadAllPlayers(accounts);
+        dbase.loadBlocking(accounts);
+    }
+
+    @Override
+    public void saveConfig() {
+        super.saveDefaultConfig();
+        dbase.saveBlocking(accounts);
+    }
+
+    @Override
+    public void onDisable() {
+        saveConfig();
     }
 
     private void loadConfig() {
         ConfigurationSection config = getConfig();
-        staleAge = config.getLong("PlayerDeleteAgeMillis", 262800000); // milliseconds in a month
+        pruneMaxAge = config.getLong("Prune.MaxAge", 262800000); // milliseconds in a month
+        pruneBatchSize = config.getInt("Prune.MaxBatchSize", 400); // players to check each tick
         flushEachTransaction = config.getBoolean("FlushEachChange", false);
     }
 
@@ -57,9 +69,9 @@ public class Tyrlon extends JavaPlugin {
         } else {
             String type = config.getString("DatabaseType", "yaml");
             if (type.equalsIgnoreCase("yaml")) {
-                dbase = new YamlDatabase(config.getConfigurationSection("database.yaml"));
+                dbase = new YamlDatabase(this, config.getConfigurationSection("database.yaml"));
             } else if (type.equalsIgnoreCase("mysql")) {
-                dbase = new MysqlDatabase(config.getConfigurationSection("database.mysql"));
+                dbase = new MysqlDatabase(this, config.getConfigurationSection("database.mysql"));
             } else {
                 // Failure!
                 if (type.equalsIgnoreCase("external")) {
@@ -75,5 +87,9 @@ public class Tyrlon extends JavaPlugin {
         Tyrlon inst = getInstance();
         Validate.isTrue(inst.dbase == null, "Tyrlon.setDatabase must be called before it is enabled");
         inst.dbase = newDb;
+    }
+
+    public Database getCurrentDatabase() {
+        return dbase;
     }
 }

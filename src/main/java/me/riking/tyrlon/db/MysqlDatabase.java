@@ -1,17 +1,28 @@
 package me.riking.tyrlon.db;
 
+import java.io.IOException;
+import java.sql.Connection;
 import java.util.Collection;
+import java.util.Set;
 
 import org.bukkit.configuration.ConfigurationSection;
 
 import me.riking.tyrlon.AccountStorage;
-import me.riking.tyrlon.Database;
+import me.riking.tyrlon.Tyrlon;
 import me.riking.tyrlon.datamodel.BankAccount;
 import me.riking.tyrlon.datamodel.PlayerAccount;
 
 public class MysqlDatabase extends SqlDatabase {
-    public MysqlDatabase(ConfigurationSection config) {
+    Tyrlon plugin;
 
+    public MysqlDatabase(Tyrlon plugin, ConfigurationSection config) {
+        super(makeConnection(config), config.getString("database"));
+        this.plugin = plugin;
+    }
+
+    private static Connection makeConnection(ConfigurationSection config) {
+        // TODO
+        return null;
     }
 
     @Override
@@ -63,9 +74,20 @@ public class MysqlDatabase extends SqlDatabase {
     }
 
     @Override
-    public void pruneOldAccounts(long maxAgeMillis) {
+    public void pruneTheseOldAccounts(Set<String> players) {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
+    public void saveBlocking(AccountStorage accounts) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void close() throws IOException {
+        super.close();
+        // TODO
+    }
 }

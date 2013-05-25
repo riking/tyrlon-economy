@@ -1,5 +1,6 @@
 package me.riking.tyrlon.db;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -52,5 +53,14 @@ public abstract class SqlDatabase implements Database {
         deletePlayer = connection.prepareStatement("DELETE FROM banks WHERE name=?");
         getPlayers = connection.prepareStatement("SELECT name, money FROM players");
         getBanks = connection.prepareStatement("SELECT bankname, owner, money FROM banks");
+    }
+
+    @Override
+    public void close() throws IOException {
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            throw new IOException(e);
+        }
     }
 }
