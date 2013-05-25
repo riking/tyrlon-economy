@@ -47,6 +47,8 @@ public class PrunePlayersTask extends BukkitRunnable {
         }
         initPlayerSet = null;
 
+        boolean wasInterrupted = false;
+
         // Submit all the OldNameFinders to Bukkit
         ArrayList<Future<Set<String>>> futures = new ArrayList<Future<Set<String>>>();
         for (OldNameFinder task : finders) {
@@ -54,7 +56,7 @@ public class PrunePlayersTask extends BukkitRunnable {
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e) {
-                // discard
+                wasInterrupted = true; // preserve interruption status
             }
         }
 
@@ -63,13 +65,17 @@ public class PrunePlayersTask extends BukkitRunnable {
             try {
                 resultSet.addAll(future.get());
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                wasInterrupted = true; // preserve interruption status
             } catch (ExecutionException e) {
                 plugin.getLogger().severe("Old player pruning task failed!");
             }
         }
 
         // Pass the results to the database handler
+        System.out.println("Prune found " + resultSet.size() + " users to prune");
+        if (wasInterrupted) {
+            Thread.currentThread().interrupt(); // preserve interruption status
+        }
         plugin.getCurrentDatabase().pruneTheseOldAccounts(resultSet);
     }
 }

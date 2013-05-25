@@ -1,7 +1,10 @@
 package me.riking.tyrlon;
 
+import java.io.IOException;
+
 import me.riking.tyrlon.db.sql.MysqlDatabase;
 import me.riking.tyrlon.db.yaml.YamlDatabase;
+import me.riking.tyrlon.pruning.PrunePlayersTask;
 
 import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.ConfigurationSection;
@@ -24,6 +27,7 @@ public class Tyrlon extends JavaPlugin {
     public boolean flushEachTransaction;
     public int pruneBatchSize;
     public long pruneMaxAge;
+    public long prunePeriod;
 
     public void onLoad() {
         instance = this;
@@ -41,6 +45,7 @@ public class Tyrlon extends JavaPlugin {
             getLogger().severe("Failed to load Tyrlon: " + e.getMessage());
         }
         dbase.loadBlocking(accounts);
+        getServer().getScheduler().runTaskTimerAsynchronously(this, new PrunePlayersTask(this), 50, prunePeriod);
     }
 
     @Override
@@ -56,8 +61,9 @@ public class Tyrlon extends JavaPlugin {
 
     private void loadConfig() {
         ConfigurationSection config = getConfig();
-        pruneMaxAge = config.getLong("Prune.MaxAge", 262800000); // milliseconds in a month
+        pruneMaxAge = config.getLong("Prune.MaxAgeMillis", 262800000); // milliseconds in a month
         pruneBatchSize = config.getInt("Prune.MaxBatchSize", 400); // players to check each tick
+        prunePeriod = config.getLong("Prune.PeriodTicks", 360000); // milliseconds in a month
         flushEachTransaction = config.getBoolean("FlushEachChange", false);
     }
 
