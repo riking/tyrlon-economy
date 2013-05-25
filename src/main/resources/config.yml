@@ -1,0 +1,12 @@
+Prune:
+    MaxAgeMillis: 262800000 # one month
+    MaxBatchSize: 400
+    PeriodTicks: 360000 # every 5 minutes
+FlushEachChange: false
+DatabaseType: yaml
+database:
+    yaml:
+    mysql:
+        host: localhost
+        port: 3006
+        blah: derp
