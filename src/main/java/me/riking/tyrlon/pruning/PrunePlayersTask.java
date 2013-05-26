@@ -25,11 +25,11 @@ public class PrunePlayersTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        System.out.println("Running prune task");
-
         Set<String> initPlayerSet = plugin.getAccountStorage().playerAccounts.keySet();
         HashSet<String> resultSet = new HashSet<String>();
         int batchSize = Math.min(plugin.pruneBatchSize, initPlayerSet.size());
+
+        plugin.getLogger().info("Running prune task for " + initPlayerSet.size() + " players");
 
         long cutoff = System.currentTimeMillis() - plugin.pruneMaxAge;
         Server server = plugin.getServer();
@@ -47,7 +47,6 @@ public class PrunePlayersTask extends BukkitRunnable {
                 currentSet = new HashSet<String>(batchSize);;
             }
         }
-        initPlayerSet = null;
 
         boolean wasInterrupted = false;
 

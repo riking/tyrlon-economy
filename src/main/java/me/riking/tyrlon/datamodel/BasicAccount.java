@@ -3,6 +3,7 @@ package me.riking.tyrlon.datamodel;
 public class BasicAccount implements Account {
     protected String name;
     protected double balance;
+    protected boolean dirty;
 
     public BasicAccount(String name) {
         this(name, 0);
@@ -11,6 +12,7 @@ public class BasicAccount implements Account {
     public BasicAccount(String name, double initial) {
         this.name = name;
         this.balance = initial;
+        setDirty();
     }
 
     @Override
@@ -26,16 +28,19 @@ public class BasicAccount implements Account {
     @Override
     public void setBalance(double money) {
         balance = money;
+        setDirty();
     }
 
     @Override
     public void deposit(double money) {
         balance += money;
+        setDirty();
     }
 
     @Override
     public void withdraw(double money) {
         balance -= money;
+        setDirty();
     }
 
     @Override
@@ -43,8 +48,22 @@ public class BasicAccount implements Account {
         return balance >= money;
     }
 
+    @Override
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    @Override
+    public void setClean() {
+        dirty = false;
+    }
+
+    public void setDirty() {
+        dirty = true;
+    }
+
     public String toString() {
-        return getClass().getName() + "(" + getName() + ": " + String.format("%.2d", getBalance() + ")");
+        return getClass().getName() + "(" + getName() + ": " + String.format("%.2f", getBalance() + ")");
     }
 
     @Override
