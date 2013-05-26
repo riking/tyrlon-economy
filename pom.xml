@@ -61,15 +61,9 @@
 		<dependency>
 			<groupId>net.milkbowl.vault</groupId>
 			<artifactId>Vault</artifactId>
-			<version>1.2.25-SNAPSHOT</version>
+			<version>1.2.26-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
-	<distributionManagement>
-		<repository>
-			<id>mcmmo-repo</id>
-			<url>file:///var/lib/jenkins/repo</url>
-		</repository>
-	</distributionManagement>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
