@@ -6,8 +6,10 @@ import me.riking.tyrlon.db.sql.MysqlDatabase;
 import me.riking.tyrlon.db.yaml.YamlDatabase;
 import me.riking.tyrlon.pruning.PrunePlayersTask;
 
+import net.milkbowl.vault.economy.Economy;
 import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Tyrlon extends JavaPlugin {
@@ -28,10 +30,13 @@ public class Tyrlon extends JavaPlugin {
     public int pruneBatchSize;
     public long pruneMaxAge;
     public long prunePeriod;
+    public String currencyName;
+    public String currencyNamePlural;
 
     public void onLoad() {
         instance = this;
         dbase = null;
+        getServer().getServicesManager().register(Economy.class, new TyrlonEconomy(this), this, ServicePriority.Normal);
     }
 
     @Override
@@ -47,6 +52,7 @@ public class Tyrlon extends JavaPlugin {
             return;
         }
         dbase.loadBlocking(accounts);
+
         getServer().getScheduler().runTaskTimerAsynchronously(this, new PrunePlayersTask(this), 50, prunePeriod);
     }
 
@@ -76,6 +82,8 @@ public class Tyrlon extends JavaPlugin {
         pruneBatchSize = config.getInt("Prune.MaxBatchSize", 400); // players to check each tick
         prunePeriod = config.getLong("Prune.PeriodTicks", 360000); // milliseconds in a month
         flushEachTransaction = config.getBoolean("FlushEachChange", false);
+        currencyName = config.getString("CurrencyName", "Dollar");
+        currencyNamePlural = config.getString("CurrencyNamePlural", "Dollars");
         if (!config.contains("database")) {
             config.createSection("database");
             config.createSection("database.yaml");
